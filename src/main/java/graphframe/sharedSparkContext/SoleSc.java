@@ -22,7 +22,6 @@ public class SoleSc {
     static SQLContext sqlCtx = new SQLContext(sparkContext);
     public static Dataset getVertexDataFrame(){
         StructType customSchema = new StructType(new StructField[] {
-                new StructField("id", DataTypes.StringType, true, Metadata.empty()),
                 new StructField("vertex", DataTypes.StringType, true, Metadata.empty())
         });
         Dataset dataframe = sqlCtx.read()
@@ -42,6 +41,18 @@ public class SoleSc {
                 .schema(customSchema)
                 .option("header", "true")
                 .load("/home/wso2/edge_data.csv");
+        return dataframe;
+    }
+    public static Dataset getSolutionsWithVertex(){
+        StructType customSchema = new StructType(new StructField[] {
+                new StructField("solution_id", DataTypes.StringType, true, Metadata.empty()),
+                new StructField("end_vertex", DataTypes.StringType, true, Metadata.empty())
+        });
+        Dataset dataframe = sqlCtx.read()
+                .format("com.databricks.spark.csv")
+                .schema(customSchema)
+                .option("header", "true")
+                .load("/home/wso2/solution_id_with_vertex.csv");
         return dataframe;
     }
 

@@ -1,17 +1,12 @@
 package graphframe;
 
-import graphframe.serializableFunction1.SerialiFunJRdd;
-import graphframe.serializableFunction1.SerializableFunction;
+import com.google.gson.JsonObject;
 import graphframe.sharedSparkContext.SoleSc;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
-import org.apache.spark.sql.RowFactory;
 import org.graphframes.GraphFrame;
-import org.graphframes.lib.PageRank;
-import scala.Option;
-import scala.Tuple2;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -28,34 +23,68 @@ public static void main(String[] args) {
 
         Dataset<Row> edge_dataset = SoleSc.getEdgeDataFrame();
 
-        GraphFrame gFrame = new GraphFrame(vertex_dataset, edge_dataset);
+        Dataset<Row> solution_ids = SoleSc.getSolutionsWithVertex();
+        solution_ids.show();
 
-        //gFrame.vertices().show();
+        Dataset<Row> joined = vertex_dataset.join(solution_ids,vertex_dataset.col("vertex").equalTo(solution_ids.col("end_vertex")),"left");
+
+        joined.drop("end_vertex").show();
+
+        GraphFrame gFrame = new GraphFrame(joined.drop("end_vertex"), edge_dataset);
+
+       gFrame.vertices().show();
         //gFrame.edges().show();
 
-        gFrame.edges().filter("src = '7'").show();
+        gFrame.edges().filter("src='1:3'").show();
 
+        String[] str = new String[]{"6:4","6:4","5:2"};
+        gFrame.vertices().filter("vertex='1:3'").show();
 
-
-
+        System.out.print(patternMine(str,gFrame));
+        //gFrame.edges().filter("dst = "+str[1].toString()+"").show();
 
 
     } catch (Exception e) {
         System.out.print(e);
     }
 }
-public static String[] patternMine(String[] str, GraphFrame gg){
-    String[] minedPatterns = null;
+public static String patternMine(String[] str, GraphFrame gg){
+
+    List<String> minedSolutions = new ArrayList<String>();
+    List<String> ending_vertex_ids = new ArrayList<String>();
+    List<List<String>> minedPatterns = new ArrayList<List<String>>();
+    List<String> temp = new ArrayList<String>();
+
+    JsonObject event = new JsonObject();
+    JsonObject solutions = new JsonObject();
     String ll = null;
+
+
     for(int i=0; i<str.length-1; i++) {
-        List<Row> dataset = gg.edges().filter("src = '8'").collectAsList();
-        for (int j = 0; j < dataset.size(); j++) {
-            if(dataset.get(1).toString()==str[i+1]){
-                ll = dataset.get(1).toString()+"-"+str[i+1];
+        List<Row> dataset = gg.edges().filter("src = \""+str[i]+"\"").collectAsList();
+        innerLoop:for (int j = 0; j < dataset.size(); j++) {
+            if(dataset.get(j).getString(1).trim().equals(str[i+1])){
+                temp.add(str[i]);
+                if(gg.vertices().filter("vertex=\"" + str[i+1] + "\"").collectAsList().get(0).getString(1)!=null){
+                    String sol = gg.vertices().filter("vertex=\"" + str[i+1] + "\"").collectAsList().get(0).getString(1);
+                    String id = gg.vertices().filter("vertex=\"" + str[i+1] + "\"").collectAsList().get(0).getString(0);
+                    minedSolutions.add(sol);
+                    ending_vertex_ids.add(id);
+                    temp.add(str[i+1]);
+                    minedPatterns.add(temp);
+                    String rr = temp.get(temp.size()-1);
+                    temp.remove(rr);
+                    break innerLoop;
+                }else{
+                    break innerLoop;
+                }
+            }
+            if(dataset.get(j).getString(1).trim().equals(str[i+1])==false && j==dataset.size()-1){
+                temp.clear();
             }
         }
-
     }
-    return minedPatterns;
+
+    return  ll;
 }
 }

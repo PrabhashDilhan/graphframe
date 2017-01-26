@@ -11,7 +11,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="org.wso2.carbon.analytics.api_1.3" level="project" />
+    <orderEntry type="library" name="org.wso2.carbon.analytics.api_1.3.0" level="project" />
+    <orderEntry type="library" name="Maven: org.wso2.carbon.analytics:org.wso2.carbon.analytics.api:1.3.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.spark:spark-core_2.11:2.0.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.avro:avro-mapred:hadoop2:1.7.7" level="project" />
     <orderEntry type="library" name="Maven: org.apache.avro:avro-ipc:1.7.7" level="project" />
@@ -152,5 +153,6 @@
     <orderEntry type="library" name="Maven: com.typesafe.scala-logging:scala-logging-slf4j_2.11:2.1.2" level="project" />
     <orderEntry type="library" name="Maven: com.databricks:spark-csv_2.10:1.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-csv:1.1" level="project" />
+    <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.1" level="project" />
   </component>
 </module>
