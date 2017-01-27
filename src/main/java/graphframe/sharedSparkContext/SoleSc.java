@@ -1,8 +1,12 @@
 package graphframe.sharedSparkContext;
 
+import graphframe.serializableFunction1.SerializableFunction;
+import graphframe.serializableFunction1.SerializableFunction1;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.Metadata;
@@ -56,7 +60,6 @@ public class SoleSc {
         return dataframe;
     }
 
-    Dataset dataframe = sqlCtx.load("/home/wso2/graph_data.txt");
     public JavaSparkContext getSparkContext(){
         return this.sparkContext;
     }

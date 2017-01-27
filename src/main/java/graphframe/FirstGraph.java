@@ -1,9 +1,11 @@
 package graphframe;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import graphframe.sharedSparkContext.SoleSc;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.functions;
 import org.graphframes.GraphFrame;
 
 import java.util.ArrayList;
@@ -24,7 +26,14 @@ public static void main(String[] args) {
         Dataset<Row> edge_dataset = SoleSc.getEdgeDataFrame();
 
         Dataset<Row> solution_ids = SoleSc.getSolutionsWithVertex();
-        solution_ids.show();
+
+        vertex_dataset = vertex_dataset.withColumn("vertex", functions.trim(vertex_dataset.col("vertex")));
+
+        //edge_dataset = vertex_dataset.withColumn("src", functions.trim(vertex_dataset.col("src")));
+        //edge_dataset = vertex_dataset.withColumn("dst", functions.trim(vertex_dataset.col("dst")));
+
+        //solution_ids = vertex_dataset.withColumn("end_vertex", functions.trim(vertex_dataset.col("end_vertex")));
+        //solution_ids = vertex_dataset.withColumn("solution_id", functions.trim(vertex_dataset.col("solution_id")));
 
         Dataset<Row> joined = vertex_dataset.join(solution_ids,vertex_dataset.col("vertex").equalTo(solution_ids.col("end_vertex")),"left");
 
@@ -32,15 +41,11 @@ public static void main(String[] args) {
 
         GraphFrame gFrame = new GraphFrame(joined.drop("end_vertex"), edge_dataset);
 
-       gFrame.vertices().show();
-        //gFrame.edges().show();
+        gFrame.vertices().show();
 
-        gFrame.edges().filter("src='1:3'").show();
+        String[] str = new String[]{"1:3","1:3","6:4","5:2"};
 
-        String[] str = new String[]{"6:4","6:4","5:2"};
-        gFrame.vertices().filter("vertex='1:3'").show();
-
-        System.out.print(patternMine(str,gFrame));
+        System.out.print(patternMine(str,gFrame).toString());
         //gFrame.edges().filter("dst = "+str[1].toString()+"").show();
 
 
@@ -48,16 +53,15 @@ public static void main(String[] args) {
         System.out.print(e);
     }
 }
-public static String patternMine(String[] str, GraphFrame gg){
+public static JsonObject patternMine(String[] str, GraphFrame gg){
 
     List<String> minedSolutions = new ArrayList<String>();
     List<String> ending_vertex_ids = new ArrayList<String>();
     List<List<String>> minedPatterns = new ArrayList<List<String>>();
     List<String> temp = new ArrayList<String>();
 
-    JsonObject event = new JsonObject();
+    JsonObject finalArnswer = new JsonObject();
     JsonObject solutions = new JsonObject();
-    String ll = null;
 
 
     for(int i=0; i<str.length-1; i++) {
@@ -72,8 +76,7 @@ public static String patternMine(String[] str, GraphFrame gg){
                     ending_vertex_ids.add(id);
                     temp.add(str[i+1]);
                     minedPatterns.add(temp);
-                    String rr = temp.get(temp.size()-1);
-                    temp.remove(rr);
+                    temp.remove(temp.size()-1);
                     break innerLoop;
                 }else{
                     break innerLoop;
@@ -84,7 +87,16 @@ public static String patternMine(String[] str, GraphFrame gg){
             }
         }
     }
+    String minedSolutionsJson = new Gson().toJson(minedSolutions);
+    String ending_vertex_idsJson = new Gson().toJson(ending_vertex_ids);
+    String minedPatternsJson = new Gson().toJson(minedPatterns);
 
-    return  ll;
+    solutions.addProperty("minedSolutions",minedSolutionsJson);
+    solutions.addProperty("ending_vertex_idsJson",ending_vertex_idsJson);
+    solutions.addProperty("minedPatternsJson",minedPatternsJson);
+    finalArnswer.add("message",solutions);
+
+
+    return  finalArnswer;
 }
 }
